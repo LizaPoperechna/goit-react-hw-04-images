@@ -13,39 +13,41 @@ export function App() {
     const [page, setPage] = useState(1);
     const [query, setQuery] = useState('');
     const [images, setImages] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(false);
-
+    const [isLoading, setIsLoading] = useState(false); 
+    //const [error, setError] = useState(null);
 
 
   useEffect(() => {
-    if (page === 0) return;
-    const fetchImageByQuery = async searchQuery => {
-      setIsLoading(true);
 
-           try {   
-                   const data = await fetchImage(query, page);
-                   const images = data.hits;
-      
-                   if (images.length === 0) {
-                     toast.warning('Нажаль, зображення по Вашому запиту відсутні');
-                         setError(true);
-                         setIsLoading(false);
-                     return;
-                   }
-      
+    if (query === '') {
+      return;
+    }   
+
+    const fetchImageByQuery = async searchQuery => {
+        setIsLoading(true);
+           try {
+                  const data = await fetchImage(query, page);
+                  const images = data.hits;
+
                   setImages(prevState => [...prevState, ...images]);
                   setIsLoading(false);
+
+                  if (images.length === 0) {
+                         toast.warning('Нажаль, зображення по Вашому запиту відсутні');
+                       //  setError(error);
+                     return;
+                  }
                    }
       
                   catch (error) {
-                    setError(true);
-                    setIsLoading(false);
+                 //   setError(error);
                     toast.error('Щось пішло не так, спробуйте ще раз')
+                } finally {
+                    setIsLoading(false);
                 }
     }
   
-    fetchImageByQuery(query); 
+    fetchImageByQuery(); 
   }, [page, query]);
 
 
@@ -59,7 +61,7 @@ export function App() {
       setPage(page => page + 1)
     };
 
-    return (
+  return (
             <>
               <SearchBar onSubmit={getImages}></SearchBar>
               {isLoading && <Loader/> }

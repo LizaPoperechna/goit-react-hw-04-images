@@ -6,7 +6,7 @@ import { Modal } from 'components/Modal/Modal';
 
 export function ImageGalleryItem({image}) {
 
-  const [showModal, setShowModal] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     const toggleModal = () => {
       setShowModal(showModal => !showModal)

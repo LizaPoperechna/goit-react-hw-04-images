@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 
 const modalRoot = document.querySelector('#modal-root')
 
-export function Modal() {
+export function Modal({image, onClose}) {
 
 useEffect(() => {
   const handleKeyDown = e => {
@@ -19,7 +19,7 @@ useEffect(() => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     }
-}, [onClose()])
+}, [onClose])
 
 
   const handleBackdropClick = event => {

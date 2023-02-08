@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import { useState, useEffect } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { SearchBar } from './Searchbar/Searchbar';
@@ -8,65 +8,64 @@ import { Loader } from "./Loader/Loader";
 import { fetchImage } from './Api';
 
 
-export class App extends Component {
+export function App() {
 
-    state = {
-        page: 1,
-        query: '',
-        images: [],
-        isLoading: false,
-        error: false,
+    const [page, setPage] = useState(1);
+    const [query, setQuery] = useState('');
+    const [images, setImages] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(false);
+
+
+
+  useEffect(() => {
+    if (page === 0) return;
+    const fetchImageByQuery = async searchQuery => {
+      setIsLoading(true);
+
+           try {   
+                   const data = await fetchImage(query, page);
+                   const images = data.hits;
+      
+                   if (images.length === 0) {
+                     toast.warning('Нажаль, зображення по Вашому запиту відсутні');
+                         setError(true);
+                         setIsLoading(false);
+                     return;
+                   }
+      
+                  setImages(prevState => [...prevState, ...images]);
+                  setIsLoading(false);
+                   }
+      
+                  catch (error) {
+                    setError(true);
+                    setIsLoading(false);
+                    toast.error('Щось пішло не так, спробуйте ще раз')
+                }
+    }
+  
+    fetchImageByQuery(query); 
+  }, [page, query]);
+
+
+  const getImages = title => {
+      setImages([]);
+      setPage(1);
+      setQuery(title);
     };
 
-    async componentDidUpdate(_, prevState) {
-      const { page, query } = this.state;
-
-      if (prevState.page !== this.state.page || prevState.query !== this.state.query)
-       {
-        try {
-            this.setState({ isLoading: true });
-            const data = await fetchImage(query, page);
-            
-            const images = data.hits;
-            if (images.length === 0) {
-              toast.warning('Нажаль, зображення по Вашому запиту відсутні');
-              this.setState({error: true, isLoading: false});
-              return
-            }
-
-            this.setState(prevState => ({
-              images: [...prevState.images, ...images], isLoading: false,
-            }));}
-
-        catch (error) {
-          this.setState({ error: true, isLoading: false })
-          toast.error('Щось пішло не так, спробуйте ще раз')
-        }
-       }}
-
-    getImages = title => {
-      this.setState({page: 1, query: title, images: []})
+  const loadMore = () => {
+      setPage(page => page + 1)
     };
-
-
-    loadMore = () => {
-      const {page} = this.state;
-      this.setState(prevState => ({page: page + 1}))
-    };
-
-
-  render() {
-    const {images, isLoading} = this.state;
 
     return (
             <>
-              <SearchBar onSubmit={this.getImages}></SearchBar>
+              <SearchBar onSubmit={getImages}></SearchBar>
               {isLoading && <Loader/> }
               <ImageGallery images={images}></ImageGallery>
-              {images.length >= 12 && <Button onClick={this.loadMore}/>}
+              {images.length >= 12 && <Button onClick={loadMore}/>}
               <ToastContainer autoClose={3000} theme="colored" />
             </>
     )
-}
-
 }
